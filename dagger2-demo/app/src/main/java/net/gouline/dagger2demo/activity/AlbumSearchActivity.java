@@ -18,13 +18,15 @@ import net.gouline.dagger2demo.model.ITunesResult;
 import net.gouline.dagger2demo.model.ITunesResultSet;
 import net.gouline.dagger2demo.rest.ITunesService;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import retrofit.Call;
 import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit.Response;
 
 /**
  * Activity for search iTunes albums by artist name.
@@ -90,17 +92,30 @@ public class AlbumSearchActivity extends ActionBarActivity implements SearchView
         mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress));
 
         // Properly injected Retrofit service
-        mITunesService.search(term, "album", new Callback<ITunesResultSet>() {
+        Call<ITunesResultSet> call = mITunesService.search(term, "album");
+        call.enqueue(new Callback<ITunesResultSet>() {
             @Override
-            public void success(ITunesResultSet iTunesResultSet, Response response) {
-                mListAdapter.addAll(iTunesResultSet.getResults());
-                mListAdapter.notifyDataSetChanged();
+            public void onResponse(Response<ITunesResultSet> response) {
+                // handle problems per http://inthecheesefactory.com/blog/retrofit-2.0/en
+                if (response.errorBody() != null) {
+                    try {
+                        Log.w(TAG, "Snap! Error in itunes api call response: "
+                                + response.errorBody().string());
+                    } catch (IOException e) {
+                        Log.w(TAG, "Snap! Failed to get error in itunes api call response", e);
+                    }
+                } else if (response.body() == null) {
+                    Log.w(TAG, "Snap! Failed to parse itunes api call response");
+                } else {
+                    mListAdapter.addAll(response.body().getResults());
+                    mListAdapter.notifyDataSetChanged();
+                }
                 mProgressDialog.dismiss();
             }
 
             @Override
-            public void failure(RetrofitError error) {
-                Log.w(TAG, "Failed to retrieve albums", error);
+            public void onFailure(Throwable t) {
+                Log.w(TAG, "Failed to retrieve albums", t);
                 mProgressDialog.dismiss();
             }
         });

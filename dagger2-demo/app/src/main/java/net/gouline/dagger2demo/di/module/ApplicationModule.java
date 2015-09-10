@@ -1,7 +1,5 @@
 package net.gouline.dagger2demo.di.module;
 
-import android.content.Context;
-
 import net.gouline.dagger2demo.DemoApplication;
 import net.gouline.dagger2demo.rest.ITunesService;
 
@@ -9,7 +7,8 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import retrofit.RestAdapter;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
 /**
  * Application-wide dependencies.
@@ -21,23 +20,26 @@ import retrofit.RestAdapter;
  */
 @Module
 public class ApplicationModule {
-    private final DemoApplication mApplication;
+    //private final DemoApplication mApplication; // seems not needed
 
     private ITunesService mITunesService;
 
-    public ApplicationModule(DemoApplication application) {
-        mApplication = application;
-        mITunesService = new RestAdapter.Builder()
-                .setEndpoint("https://itunes.apple.com")
+    public ApplicationModule() {
+    //public ApplicationModule(DemoApplication application) {
+    //    mApplication = application;
+        mITunesService = new Retrofit.Builder()
+                .baseUrl("https://itunes.apple.com/")
+                .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(ITunesService.class);
     }
 
+    /* seems not needed
     @Provides
     @Singleton
     Context provideApplicationContext() {
         return mApplication;
-    }
+    } */
 
     @Provides
     @Singleton

@@ -20,9 +20,10 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mComponent = DaggerDemoApplicationComponent.builder()
-                .applicationModule(new ApplicationModule(this))
+                .applicationModule(new ApplicationModule())
+                //.applicationModule(new ApplicationModule(this))
                 .build();
-        mComponent.inject(this);
+        //mComponent.inject(this); // seems not needed
     }
 
     public DemoApplicationComponent getComponent() {

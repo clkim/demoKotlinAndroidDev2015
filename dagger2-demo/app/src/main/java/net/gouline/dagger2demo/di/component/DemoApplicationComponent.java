@@ -19,7 +19,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = ApplicationModule.class)
 public interface DemoApplicationComponent {
-    void inject(DemoApplication application);
+    //void inject(DemoApplication application); // seems not needed
 
     void inject(AlbumSearchActivity activity);
 }
