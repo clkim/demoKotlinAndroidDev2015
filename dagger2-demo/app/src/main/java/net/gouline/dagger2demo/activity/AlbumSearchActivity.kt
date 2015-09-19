@@ -35,12 +35,12 @@ import rx.schedulers.Schedulers
  */
 public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextListener {
 
-    Inject
+    @Inject
     var mITunesService: ITunesService
 
-    InjectView(android.R.id.list)
+    @InjectView(android.R.id.list)
     var mListView: ListView
-    InjectView(R.id.empty_view)
+    @InjectView(R.id.empty_view)
     var mEmptyView: View
 
     private var mProgressDialog: ProgressDialog? = null
@@ -53,19 +53,19 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         ButterKnife.inject(this)
 
         // Actual injection, now performed via the component
-        DemoApplication.from(this).getComponent().inject(this)
+        DemoApplication.from(this).component.inject(this)
 
         mListAdapter = ArrayAdapter<ITunesResult>(this, android.R.layout.simple_list_item_1)
-        mListView.setEmptyView(mEmptyView)
-        mListView.setAdapter(mListAdapter)
+        mListView.emptyView = mEmptyView
+        mListView.adapter = mListAdapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        getMenuInflater().inflate(R.menu.activity_album_search, menu)
+        menuInflater.inflate(R.menu.activity_album_search, menu)
 
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        val searchView = menu.findItem(R.id.menu_item_search).getActionView() as SearchView
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()))
+        val searchView = menu.findItem(R.id.menu_item_search).actionView as SearchView
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
         searchView.setOnQueryTextListener(this)
 
         return true
@@ -81,7 +81,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     }
 
     private fun fetchResults(term: String) {
-        if (mProgressDialog != null && mProgressDialog!!.isShowing()) {
+        if (mProgressDialog != null && mProgressDialog!!.isShowing) {
             mProgressDialog!!.dismiss()
         }
         mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
@@ -89,7 +89,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         // Properly injected Retrofit service
         mITunesService.search(term, "album").subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : Action1<ITunesResultSet> {
             override fun call(iTunesResultSet: ITunesResultSet) {
-                mListAdapter!!.addAll(iTunesResultSet.getResults())
+                mListAdapter!!.addAll(iTunesResultSet.results)
                 mListAdapter!!.notifyDataSetChanged()
             }
         }, object : Action1<Throwable> {
@@ -105,6 +105,6 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     }
 
     companion object {
-        private val TAG = javaClass<AlbumSearchActivity>().getSimpleName()
+        private val TAG = AlbumSearchActivity::class.java.simpleName
     }
 }
