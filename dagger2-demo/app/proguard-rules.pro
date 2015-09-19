@@ -53,6 +53,15 @@
     long consumerNode;
 }
 
+# Kotlin
+-dontwarn kotlin.**
+# add keep class to try to avoid :app:packageDebug FAILED
+#  Execution failed for task':app:packageDebug'. > Unable to compute hash of /Users/clkim/AndroidstudioProjects/android-samples/dagger2-demo/app/build/intermediates/classes-proguard/debug/classes.jar
+#  seen with Run | Run 'app'
+#  but can't be sure really needed because with M13 Kotlin, a Proguard bug surfaced https://youtrack.jetbrains.com/issue/KT-9184
+#  and we intermittently see :app:proguardDebug  Exception while processing task  java.lang.StringIndexOutOfBoundsException: String index out of range: 37
+-keep class kotlin.** { *; }
+
 # Butter Knife
 -keep class butterknife.** { *; }
 -dontwarn butterknife.internal.**

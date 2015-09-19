@@ -8,24 +8,19 @@ import android.support.v7.app.ActionBarActivity
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
-
+import kotlinx.android.synthetic.activity_album_search.empty_view
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
 import net.gouline.dagger2demo.model.ITunesResult
 import net.gouline.dagger2demo.model.ITunesResultSet
 import net.gouline.dagger2demo.rest.ITunesService
-
-import javax.inject.Inject
-
-import butterknife.ButterKnife
-import butterknife.InjectView
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action0
 import rx.functions.Action1
 import rx.schedulers.Schedulers
+import javax.inject.Inject
 
 /**
  * Activity for search iTunes albums by artist name.
@@ -36,12 +31,11 @@ import rx.schedulers.Schedulers
 public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextListener {
 
     @Inject
-    var mITunesService: ITunesService
+    lateinit var mITunesService: ITunesService
 
-    @InjectView(android.R.id.list)
-    var mListView: ListView
-    @InjectView(R.id.empty_view)
-    var mEmptyView: View
+    // Kotlin Android Extensions seems NOT to work with android-domain id e.g. "@android:id/list"
+    //  so need to declare here and initialize later with findViewById() the old fashion way
+    var mListView: ListView? = null
 
     private var mProgressDialog: ProgressDialog? = null
 
@@ -50,14 +44,14 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_search)
-        ButterKnife.inject(this)
+        mListView = findViewById(android.R.id.list) as ListView
 
         // Actual injection, now performed via the component
         DemoApplication.from(this).component.inject(this)
 
         mListAdapter = ArrayAdapter<ITunesResult>(this, android.R.layout.simple_list_item_1)
-        mListView.emptyView = mEmptyView
-        mListView.adapter = mListAdapter
+        mListView?.emptyView = empty_view // id of TextView, using Kotlin Android Extensions
+        mListView?.adapter = mListAdapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -87,21 +81,28 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
 
         // Properly injected Retrofit service
-        mITunesService.search(term, "album").subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(object : Action1<ITunesResultSet> {
-            override fun call(iTunesResultSet: ITunesResultSet) {
-                mListAdapter!!.addAll(iTunesResultSet.results)
-                mListAdapter!!.notifyDataSetChanged()
-            }
-        }, object : Action1<Throwable> {
-            override fun call(throwable: Throwable) {
-                Log.w(TAG, "Failed to retrieve albums", throwable)
-                mProgressDialog!!.dismiss()
-            }
-        }, object : Action0 {
-            override fun call() {
-                mProgressDialog!!.dismiss()
-            }
-        })
+        mITunesService.search(term, "album")
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        object : Action1<ITunesResultSet> {
+                            override fun call(iTunesResultSet: ITunesResultSet) {
+                                mListAdapter!!.addAll(iTunesResultSet.results)
+                                mListAdapter!!.notifyDataSetChanged()
+                            }
+                        },
+                        object : Action1<Throwable> {
+                            override fun call(throwable: Throwable) {
+                                Log.w(TAG, "Failed to retrieve albums", throwable)
+                                mProgressDialog!!.dismiss()
+                            }
+                        },
+                        object : Action0 {
+                            override fun call() {
+                                mProgressDialog!!.dismiss()
+                            }
+                        }
+                )
     }
 
     companion object {
