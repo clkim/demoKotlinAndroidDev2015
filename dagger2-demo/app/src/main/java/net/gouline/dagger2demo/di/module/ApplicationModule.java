@@ -9,6 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
+import retrofit.RxJavaCallAdapterFactory;
 
 /**
  * Application-wide dependencies.
@@ -30,6 +31,7 @@ public class ApplicationModule {
         mITunesService = new Retrofit.Builder()
                 .baseUrl("https://itunes.apple.com/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build()
                 .create(ITunesService.class);
     }

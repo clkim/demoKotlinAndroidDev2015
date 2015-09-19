@@ -42,6 +42,17 @@
 
 -dontwarn okio.**
 
+# NoSuchFieldException: producerIndex
+#  https://github.com/ReactiveX/RxJava/issues/3097
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+    long producerIndex;
+    long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    long producerNode;
+    long consumerNode;
+}
+
 # Butter Knife
 -keep class butterknife.** { *; }
 -dontwarn butterknife.internal.**

@@ -18,15 +18,14 @@ import net.gouline.dagger2demo.model.ITunesResult;
 import net.gouline.dagger2demo.model.ITunesResultSet;
 import net.gouline.dagger2demo.rest.ITunesService;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Activity for search iTunes albums by artist name.
@@ -92,32 +91,30 @@ public class AlbumSearchActivity extends ActionBarActivity implements SearchView
         mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress));
 
         // Properly injected Retrofit service
-        Call<ITunesResultSet> call = mITunesService.search(term, "album");
-        call.enqueue(new Callback<ITunesResultSet>() {
-            @Override
-            public void onResponse(Response<ITunesResultSet> response) {
-                // handle problems per http://inthecheesefactory.com/blog/retrofit-2.0/en
-                if (response.errorBody() != null) {
-                    try {
-                        Log.w(TAG, "Snap! Error in itunes api call response: "
-                                + response.errorBody().string());
-                    } catch (IOException e) {
-                        Log.w(TAG, "Snap! Failed to get error in itunes api call response", e);
-                    }
-                } else if (response.body() == null) {
-                    Log.w(TAG, "Snap! Failed to parse itunes api call response");
-                } else {
-                    mListAdapter.addAll(response.body().getResults());
-                    mListAdapter.notifyDataSetChanged();
-                }
-                mProgressDialog.dismiss();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.w(TAG, "Failed to retrieve albums", t);
-                mProgressDialog.dismiss();
-            }
-        });
+        mITunesService.search(term, "album")
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        new Action1<ITunesResultSet>() {
+                            @Override
+                            public void call(ITunesResultSet iTunesResultSet) {
+                                mListAdapter.addAll(iTunesResultSet.getResults());
+                                mListAdapter.notifyDataSetChanged();
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Log.w(TAG, "Failed to retrieve albums", throwable);
+                                mProgressDialog.dismiss();
+                            }
+                        },
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                mProgressDialog.dismiss();
+                            }
+                        }
+                );
     }
 }

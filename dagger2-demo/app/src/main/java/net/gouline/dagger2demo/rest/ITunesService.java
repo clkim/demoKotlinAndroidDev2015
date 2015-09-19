@@ -6,6 +6,7 @@ import retrofit.Call;
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Query;
+import rx.Observable;
 
 /**
  * iTunes service.
@@ -14,5 +15,5 @@ import retrofit.http.Query;
  */
 public interface ITunesService {
     @GET("search")
-    Call<ITunesResultSet> search(@Query("term") String term, @Query("entity") String entity);
+    Observable<ITunesResultSet> search(@Query("term") String term, @Query("entity") String entity);
 }
