@@ -10,15 +10,13 @@ import android.util.Log
 import android.view.Menu
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import kotlinx.android.synthetic.activity_album_search.empty_view
+import kotlinx.android.synthetic.activity_album_search.*
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
 import net.gouline.dagger2demo.model.ITunesResult
 import net.gouline.dagger2demo.model.ITunesResultSet
 import net.gouline.dagger2demo.rest.ITunesService
 import rx.android.schedulers.AndroidSchedulers
-import rx.functions.Action0
-import rx.functions.Action1
 import rx.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -85,23 +83,11 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        object : Action1<ITunesResultSet> {
-                            override fun call(iTunesResultSet: ITunesResultSet) {
-                                mListAdapter!!.addAll(iTunesResultSet.results)
-                                mListAdapter!!.notifyDataSetChanged()
-                            }
-                        },
-                        object : Action1<Throwable> {
-                            override fun call(throwable: Throwable) {
-                                Log.w(TAG, "Failed to retrieve albums", throwable)
-                                mProgressDialog!!.dismiss()
-                            }
-                        },
-                        object : Action0 {
-                            override fun call() {
-                                mProgressDialog!!.dismiss()
-                            }
-                        }
+                        { iTunesResultSet ->
+                            mListAdapter!!.addAll(iTunesResultSet.results)
+                            mListAdapter!!.notifyDataSetChanged() },
+                        { throwable -> Log.w(TAG, "Failed to retrieve albums", throwable) },
+                        { -> mProgressDialog!!.dismiss() }
                 )
     }
 
