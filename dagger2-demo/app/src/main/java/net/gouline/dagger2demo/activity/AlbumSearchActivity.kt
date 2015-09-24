@@ -3,21 +3,28 @@ package net.gouline.dagger2demo.activity
 import android.app.ProgressDialog
 import android.app.SearchManager
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.ActionBarActivity
+import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
-import android.widget.ArrayAdapter
-import android.widget.ListView
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.activity_album_search.*
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
 import net.gouline.dagger2demo.model.ITunesResult
 import net.gouline.dagger2demo.model.ITunesResultSet
 import net.gouline.dagger2demo.rest.ITunesService
+import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.io.InputStream
+import java.net.URL
 import javax.inject.Inject
 
 /**
@@ -31,25 +38,22 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     @Inject
     lateinit var mITunesService: ITunesService
 
-    // Kotlin Android Extensions seems NOT to work with android-domain id e.g. "@android:id/list"
-    //  so need to declare here and initialize later with findViewById() the old fashion way
-    var mListView: ListView? = null
-
     private var mProgressDialog: ProgressDialog? = null
 
-    private var mListAdapter: ArrayAdapter<ITunesResult>? = null
+    private var mGridAdapter: GridAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_search)
-        mListView = findViewById(android.R.id.list) as ListView
 
         // Actual injection, now performed via the component
         DemoApplication.from(this).component.inject(this)
 
-        mListAdapter = ArrayAdapter<ITunesResult>(this, android.R.layout.simple_list_item_1)
-        mListView?.emptyView = empty_view // id of TextView, using Kotlin Android Extensions
-        mListView?.adapter = mListAdapter
+        mGridAdapter = GridAdapter()
+
+        // id of RecyclerView in layout, using Kotlin Android Extensions
+        recycler_view.adapter = mGridAdapter
+        recycler_view.layoutManager = GridLayoutManager(this, 2)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -65,29 +69,46 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     override fun onQueryTextSubmit(s: String): Boolean {
         fetchResults(s)
+
+        // hide soft keyboard
+        val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(recycler_view.applicationWindowToken, 0)
         return true
     }
 
     override fun onQueryTextChange(s: String): Boolean {
+        // hide textview displaying the prompt // TODO put into a method to be more DRY
+        if (s.length() > 0 || mGridAdapter!!.itemCount > 0)
+            empty_view.visibility = View.GONE   // id of TextView - Kotlin Android Extensions
+        else
+            empty_view.visibility = View.VISIBLE
         return false
     }
 
     private fun fetchResults(term: String) {
-        if (mProgressDialog != null && mProgressDialog!!.isShowing) {
-            mProgressDialog!!.dismiss()
-        }
-        mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
+//        if (mProgressDialog != null && mProgressDialog!!.isShowing) {
+//            mProgressDialog!!.dismiss()
+//        }
+//        mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
 
         // Properly injected Retrofit service
         mITunesService.search(term, "album")
+                .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
+                .map({ iTunesResult ->
+                    val url: URL = URL(iTunesResult.getArtworkUrl100())
+                    val instream: InputStream = url.openConnection().inputStream
+                    val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
+                    AlbumItem(bitmap, iTunesResult.getCollectionName())
+                })
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        { iTunesResultSet ->
-                            mListAdapter!!.addAll(iTunesResultSet.results)
-                            mListAdapter!!.notifyDataSetChanged() },
+                        { albumItem ->
+                            mGridAdapter!!.addAlbumItem(albumItem)
+                            mGridAdapter!!.notifyDataSetChanged() },
                         { throwable -> Log.w(TAG, "Failed to retrieve albums", throwable) },
-                        { -> mProgressDialog!!.dismiss() }
+                        { }
+//                        { ->  mProgressDialog!!.dismiss() }
                 )
     }
 

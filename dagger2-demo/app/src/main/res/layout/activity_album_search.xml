@@ -15,8 +15,8 @@
         android:text="@string/search_empty"
         tools:visibility="gone"/>
 
-    <ListView
-        android:id="@android:id/list"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </FrameLayout>

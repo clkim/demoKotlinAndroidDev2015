@@ -26,4 +26,15 @@ public class ITunesResult implements Serializable {
     public String toString() {
         return mCollectionName;
     }
+
+    @SerializedName("artworkUrl100")
+    private String artworkUrl100;
+
+    public String getArtworkUrl100() {
+        return artworkUrl100;
+    }
+
+    public void setArtworkUrl100(String artworkUrl100) {
+        this.artworkUrl100 = artworkUrl100;
+    }
 }
