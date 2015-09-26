@@ -33,11 +33,11 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
 
     public GridAdapter() {
         super();
-        albumItems = new ArrayList<AlbumItem>();
+        albumItems = new ArrayList<>();
     }
 
-    public void addAll(List<AlbumItem> items) {
-        albumItems.addAll(items);
+    public void clear() {
+        albumItems.clear();
     }
 
     public void addAlbumItem(AlbumItem item) {
@@ -48,8 +48,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     public GridAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_row, parent, false);
-        ViewHolder viewHolder = new ViewHolder(v);
-        return viewHolder;
+        return new ViewHolder(v);
     }
 
     @Override

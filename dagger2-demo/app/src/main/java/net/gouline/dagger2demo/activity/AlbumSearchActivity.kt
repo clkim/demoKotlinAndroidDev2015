@@ -68,21 +68,31 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         return true
     }
 
-    override fun onQueryTextSubmit(s: String): Boolean {
-        fetchResults(s)
+    override fun onQueryTextSubmit(term: String): Boolean {
+        if (term.length() > 0) {
+            // clear the cached observable from last api call
+            DemoApplication.albumItemObservableCache = null
+            // clear the items in recyclerview adapter
+            mGridAdapter?.clear()
 
-        // hide soft keyboard
-        val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(recycler_view.applicationWindowToken, 0)
+            fetchResults(term)
+
+            // hide soft keyboard
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(recycler_view.applicationWindowToken, 0)
+        }
+
         return true
     }
 
     override fun onQueryTextChange(s: String): Boolean {
-        // hide textview displaying the prompt // TODO put into a method to be more DRY
-        if (s.length() > 0 || mGridAdapter!!.itemCount > 0)
-            empty_view.visibility = View.GONE   // id of TextView - Kotlin Android Extensions
-        else
+        // show prompt-textview if search term is blanked out and no album items are displayed
+        //  using id of TextView - Kotlin Android Extensions
+        if (s.length() > 0)
+            empty_view.visibility = View.GONE
+        else if (s.length() == 0 && mGridAdapter?.itemCount == 0)
             empty_view.visibility = View.VISIBLE
+
         return false
     }
 
