@@ -24,8 +24,8 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
 
         public ViewHolder(View itemView) {
             super(itemView);
-            imgThumbnail = (ImageView)itemView.findViewById(R.id.img_thumbnail);
-            textView = (TextView)itemView.findViewById(R.id.tv_species);
+            imgThumbnail = (ImageView)itemView.findViewById(R.id.thumbnail);
+            textView = (TextView)itemView.findViewById(R.id.title);
         }
     }
 
@@ -47,7 +47,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     @Override
     public GridAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.grid_item, parent, false);
+                .inflate(R.layout.list_row, parent, false);
         ViewHolder viewHolder = new ViewHolder(v);
         return viewHolder;
     }

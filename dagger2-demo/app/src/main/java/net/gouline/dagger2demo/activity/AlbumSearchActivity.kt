@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.ActionBarActivity
-import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.util.Log
@@ -52,7 +51,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
         // id of RecyclerView in layout, using Kotlin Android Extensions
         recycler_view.adapter = mGridAdapter
-        recycler_view.layoutManager = GridLayoutManager(this, 2)
+        recycler_view.layoutManager = LinearLayoutManager(this)
 
         if (DemoApplication.albumItemObservableCache != null)
             fetchResults("")
