@@ -133,7 +133,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
              .subscribe(
                      { albumItem ->
                          mAlbumViewAdapter!!.addAlbumItem(albumItem)
-                         mAlbumViewAdapter!!.notifyDataSetChanged()
+                         mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
                      },
                      { throwable -> Log.w(TAG, "Failed to retrieve albums", throwable) }
              )
