@@ -38,7 +38,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     private var mProgressDialog: ProgressDialog? = null
 
-    private var mGridAdapter: GridAdapter? = null
+    private var mAlbumViewAdapter: AlbumViewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,14 +47,19 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         // Actual injection, now performed via the component
         DemoApplication.from(this).component.inject(this)
 
-        mGridAdapter = GridAdapter()
+        mAlbumViewAdapter = AlbumViewAdapter()
 
         // id of RecyclerView in layout, using Kotlin Android Extensions
-        recycler_view.adapter = mGridAdapter
+        recycler_view.adapter = mAlbumViewAdapter
         recycler_view.layoutManager = LinearLayoutManager(this)
 
-        if (DemoApplication.albumItemObservableCache != null)
-            fetchResults("")
+        // if cached observable, use it to display album items from prior api call
+        if (DemoApplication.albumItemObservableCache != null &&
+                DemoApplication.albumItemObservableCache.count().toBlocking().single() != 0) {
+            displayCachedResults(DemoApplication.albumItemObservableCache)
+            // hide prompt-textview
+            setPromptVisibility(View.GONE)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -73,7 +78,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
             // clear the cached observable from last api call
             DemoApplication.albumItemObservableCache = null
             // clear the items in recyclerview adapter
-            mGridAdapter?.clear()
+            mAlbumViewAdapter?.clear()
 
             fetchResults(term)
 
@@ -87,11 +92,10 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     override fun onQueryTextChange(s: String): Boolean {
         // show prompt-textview if search term is blanked out and no album items are displayed
-        //  using id of TextView - Kotlin Android Extensions
         if (s.length() > 0)
-            empty_view.visibility = View.GONE
-        else if (s.length() == 0 && mGridAdapter?.itemCount == 0)
-            empty_view.visibility = View.VISIBLE
+            setPromptVisibility(View.GONE)
+        else if (s.length() == 0 && mAlbumViewAdapter?.itemCount == 0)
+            setPromptVisibility(View.VISIBLE)
 
         return false
     }
@@ -116,19 +120,28 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
                             .subscribeOn(Schedulers.newThread())
                             .cache()
         }
-        DemoApplication.albumItemObservableCache
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { albumItem ->
-                            mGridAdapter!!.addAlbumItem(albumItem)
-                            mGridAdapter!!.notifyDataSetChanged() },
-                        { throwable -> Log.w(TAG, "Failed to retrieve albums", throwable) },
-                        { }
-//                        { ->  mProgressDialog!!.dismiss() }
-                )
+//        mProgressDialog!!.dismiss()
+        displayCachedResults(DemoApplication.albumItemObservableCache)
+    }
+
+    private fun displayCachedResults(cache: Observable<AlbumItem>) {
+        cache.observeOn(AndroidSchedulers.mainThread())
+             .subscribe(
+                     { albumItem ->
+                         mAlbumViewAdapter!!.addAlbumItem(albumItem)
+                         mAlbumViewAdapter!!.notifyDataSetChanged()
+                     },
+                     { throwable -> Log.w(TAG, "Failed to retrieve albums", throwable) }
+             )
     }
 
     companion object {
         private val TAG = AlbumSearchActivity::class.java.simpleName
+    }
+
+    private fun setPromptVisibility(visibility: Int) {
+        // using id of TextView - Kotlin Android Extensions
+        //  this contains the prompt to search for artists' albums
+        empty_view.visibility = visibility
     }
 }

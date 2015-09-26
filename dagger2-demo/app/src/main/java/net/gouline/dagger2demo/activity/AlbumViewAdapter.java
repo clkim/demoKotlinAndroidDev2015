@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by clkim on 9/22/15.
  */
-public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
+public class AlbumViewAdapter extends RecyclerView.Adapter<AlbumViewAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -31,7 +31,7 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
 
     private List<AlbumItem> albumItems;
 
-    public GridAdapter() {
+    public AlbumViewAdapter() {
         super();
         albumItems = new ArrayList<>();
     }
@@ -45,14 +45,14 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     }
 
     @Override
-    public GridAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public AlbumViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_row, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(GridAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(AlbumViewAdapter.ViewHolder holder, int position) {
         AlbumItem albumItem = albumItems.get(position);
         holder.textView.setText(albumItem.getName());
         holder.imgThumbnail.setImageBitmap(albumItem.getBitMap());
