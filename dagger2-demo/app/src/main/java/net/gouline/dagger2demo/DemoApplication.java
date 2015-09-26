@@ -4,9 +4,12 @@ import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import net.gouline.dagger2demo.activity.AlbumItem;
 import net.gouline.dagger2demo.di.component.DaggerDemoApplicationComponent;
 import net.gouline.dagger2demo.di.component.DemoApplicationComponent;
 import net.gouline.dagger2demo.di.module.ApplicationModule;
+
+import rx.Observable;
 
 /**
  * Custom application definition.
@@ -15,6 +18,8 @@ import net.gouline.dagger2demo.di.module.ApplicationModule;
  */
 public class DemoApplication extends Application {
     private DemoApplicationComponent mComponent;
+
+    static public Observable<AlbumItem> albumItemObservableCache;
 
     @Override
     public void onCreate() {

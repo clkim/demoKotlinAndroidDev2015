@@ -8,17 +8,16 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.ActionBarActivity
 import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import kotlinx.android.synthetic.activity_album_search.*
+import kotlinx.android.synthetic.activity_album_search.empty_view
+import kotlinx.android.synthetic.activity_album_search.recycler_view
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
-import net.gouline.dagger2demo.model.ITunesResult
-import net.gouline.dagger2demo.model.ITunesResultSet
 import net.gouline.dagger2demo.rest.ITunesService
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -54,6 +53,9 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         // id of RecyclerView in layout, using Kotlin Android Extensions
         recycler_view.adapter = mGridAdapter
         recycler_view.layoutManager = GridLayoutManager(this, 2)
+
+        if (DemoApplication.albumItemObservableCache != null)
+            fetchResults("")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -91,16 +93,21 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 //        }
 //        mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
 
-        // Properly injected Retrofit service
-        mITunesService.search(term, "album")
-                .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
-                .map({ iTunesResult ->
-                    val url: URL = URL(iTunesResult.getArtworkUrl100())
-                    val instream: InputStream = url.openConnection().inputStream
-                    val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
-                    AlbumItem(bitmap, iTunesResult.getCollectionName())
-                })
-                .subscribeOn(Schedulers.newThread())
+        if (DemoApplication.albumItemObservableCache == null) {
+            DemoApplication.albumItemObservableCache =
+                    // Properly injected Retrofit service
+                    mITunesService.search(term, "album")
+                            .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
+                            .map({ iTunesResult ->
+                                val url: URL = URL(iTunesResult.artworkUrl100)
+                                val instream: InputStream = url.openConnection().inputStream
+                                val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
+                                AlbumItem(bitmap, iTunesResult.collectionName)
+                            })
+                            .subscribeOn(Schedulers.newThread())
+                            .cache()
+        }
+        DemoApplication.albumItemObservableCache
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { albumItem ->
