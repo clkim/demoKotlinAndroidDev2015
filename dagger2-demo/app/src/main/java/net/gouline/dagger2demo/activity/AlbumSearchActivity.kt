@@ -54,8 +54,12 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         recycler_view.layoutManager = LinearLayoutManager(this)
 
         // if cached observable, use it to display album items from prior api call
-        if (DemoApplication.albumItemObservableCache != null &&
-                DemoApplication.albumItemObservableCache.count().toBlocking().single() != 0) {
+        // tried checking for empty sequence in cached observable using
+        //   DemoApplication.albumItemObservableCache.count().toBlocking().single() != 0
+        //  but it is too slow on orientation change right after starting a search, since it seems
+        //  to block so as to count the items coming into the sequence from the new search; so we
+        //  accept the edge case that displays an empty view if cache is present but empty
+        if (DemoApplication.albumItemObservableCache != null) {
             displayCachedResults(DemoApplication.albumItemObservableCache)
             // hide prompt-textview
             setPromptVisibility(View.GONE)
