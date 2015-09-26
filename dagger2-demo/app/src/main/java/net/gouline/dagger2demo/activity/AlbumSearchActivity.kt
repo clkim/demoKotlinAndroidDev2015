@@ -1,6 +1,5 @@
 package net.gouline.dagger2demo.activity
 
-import android.app.ProgressDialog
 import android.app.SearchManager
 import android.content.Context
 import android.graphics.Bitmap
@@ -35,8 +34,6 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     @Inject
     lateinit var mITunesService: ITunesService
-
-    private var mProgressDialog: ProgressDialog? = null
 
     private var mAlbumViewAdapter: AlbumViewAdapter? = null
 
@@ -105,11 +102,6 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     }
 
     private fun fetchResults(term: String) {
-//        if (mProgressDialog != null && mProgressDialog!!.isShowing) {
-//            mProgressDialog!!.dismiss()
-//        }
-//        mProgressDialog = ProgressDialog.show(this, null, getString(R.string.search_progress))
-
         if (DemoApplication.albumItemObservableCache == null) {
             DemoApplication.albumItemObservableCache =
                     // Properly injected Retrofit service
@@ -124,7 +116,7 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
                             .subscribeOn(Schedulers.newThread())
                             .cache()
         }
-//        mProgressDialog!!.dismiss()
+
         displayCachedResults(DemoApplication.albumItemObservableCache)
     }
 
