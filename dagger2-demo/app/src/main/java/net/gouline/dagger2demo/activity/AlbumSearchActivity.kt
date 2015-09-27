@@ -20,6 +20,7 @@ import net.gouline.dagger2demo.rest.ITunesService
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import rx.subscriptions.CompositeSubscription
 import java.io.InputStream
 import java.net.URL
 import javax.inject.Inject
@@ -37,6 +38,8 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     private var mAlbumViewAdapter: AlbumViewAdapter? = null
 
+    private var mCompositeSubscription: CompositeSubscription? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_search)
@@ -49,6 +52,11 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         // id of RecyclerView in layout, using Kotlin Android Extensions
         recycler_view.adapter = mAlbumViewAdapter
         recycler_view.layoutManager = LinearLayoutManager(this)
+
+        // Reference - http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
+        // we follow the pattern in above blog reference, although we have just one subscription in
+        //  this demo app and un-subscribing from the subscription directly seemed to work ok too
+        mCompositeSubscription = CompositeSubscription()
 
         // if cached observable, use it to display album items from prior api call
         // tried checking for empty sequence in cached observable using
@@ -101,6 +109,11 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         return false
     }
 
+    override fun onDestroy() {
+        super.onStop()
+        mCompositeSubscription!!.unsubscribe()
+    }
+
     private fun fetchResults(term: String) {
         if (DemoApplication.albumItemObservableCache == null) {
             DemoApplication.albumItemObservableCache =
@@ -121,15 +134,20 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     }
 
     private fun displayCachedResults(cache: Observable<AlbumItem>) {
-        cache.observeOn(AndroidSchedulers.mainThread())
-             .subscribe(
-                     { albumItem ->
-                         mAlbumViewAdapter!!.addAlbumItem(albumItem)
-                         mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
-                     },
-                     { throwable -> Log.w(TAG, "Failed to retrieve albums\n"+throwable.getMessage(),
-                             throwable) }
-             )
+        // subscribe to the observable in order to display the album items, and also
+        // add the subscription to the CompositeSubscription so we can do lifecycle un-subscribe
+        mCompositeSubscription!!.add(cache.observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { albumItem ->
+                            mAlbumViewAdapter!!.addAlbumItem(albumItem)
+                            mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
+                        },
+                        { throwable ->
+                            Log.w(TAG, "Failed to retrieve albums\n" + throwable.getMessage(),
+                                    throwable)
+                        }
+                )
+        )
     }
 
     companion object {
