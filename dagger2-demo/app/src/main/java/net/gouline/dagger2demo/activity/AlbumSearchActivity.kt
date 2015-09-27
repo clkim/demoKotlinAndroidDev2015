@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.activity_album_search.empty_view
 import kotlinx.android.synthetic.activity_album_search.recycler_view
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
+import net.gouline.dagger2demo.model.ITunesResult
 import net.gouline.dagger2demo.rest.ITunesService
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -117,16 +118,18 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
                 // Properly injected Retrofit service
                 mITunesService.search(term, "album")
                         .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
-                        .map({ iTunesResult ->
-                            val url: URL = URL(iTunesResult.artworkUrl100)
-                            val instream: InputStream = url.openConnection().inputStream
-                            val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
-                            AlbumItem(bitmap, iTunesResult.collectionName)
-                        })
+                        .map({ iTunesResult -> getAlbumItemFromITuneResult(iTunesResult) })
                         .subscribeOn(Schedulers.newThread())
                         .cache()
 
         displayCachedResults(DemoApplication.albumItemObservableCache)
+    }
+
+    private fun getAlbumItemFromITuneResult(iTunesResult: ITunesResult): AlbumItem {
+        val url: URL = URL(iTunesResult.artworkUrl100)
+        val instream: InputStream = url.openConnection().inputStream
+        val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
+        return AlbumItem(bitmap, iTunesResult.collectionName)
     }
 
     private fun displayCachedResults(cache: Observable<AlbumItem>) {
