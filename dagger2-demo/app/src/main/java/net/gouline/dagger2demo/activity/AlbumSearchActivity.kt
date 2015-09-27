@@ -84,11 +84,6 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
 
     override fun onQueryTextSubmit(term: String): Boolean {
         if (term.length() > 0) {
-            // clear the cached observable from last api call
-            DemoApplication.albumItemObservableCache = null
-            // clear the items in recyclerview adapter
-            mAlbumViewAdapter?.clear()
-
             fetchResults(term)
 
             // hide soft keyboard
@@ -115,20 +110,21 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
     }
 
     private fun fetchResults(term: String) {
-        if (DemoApplication.albumItemObservableCache == null) {
-            DemoApplication.albumItemObservableCache =
-                    // Properly injected Retrofit service
-                    mITunesService.search(term, "album")
-                            .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
-                            .map({ iTunesResult ->
-                                val url: URL = URL(iTunesResult.artworkUrl100)
-                                val instream: InputStream = url.openConnection().inputStream
-                                val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
-                                AlbumItem(bitmap, iTunesResult.collectionName)
-                            })
-                            .subscribeOn(Schedulers.newThread())
-                            .cache()
-        }
+        // clear the items in recyclerview adapter
+        mAlbumViewAdapter?.clear()
+        // reset cached observable
+        DemoApplication.albumItemObservableCache =
+                // Properly injected Retrofit service
+                mITunesService.search(term, "album")
+                        .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
+                        .map({ iTunesResult ->
+                            val url: URL = URL(iTunesResult.artworkUrl100)
+                            val instream: InputStream = url.openConnection().inputStream
+                            val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
+                            AlbumItem(bitmap, iTunesResult.collectionName)
+                        })
+                        .subscribeOn(Schedulers.newThread())
+                        .cache()
 
         displayCachedResults(DemoApplication.albumItemObservableCache)
     }
