@@ -7,13 +7,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import net.gouline.dagger2demo.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by clkim on 9/22/15.
+ * Created by clkim on 9/22/15
  */
 public class AlbumViewAdapter extends RecyclerView.Adapter<AlbumViewAdapter.ViewHolder> {
 
@@ -55,7 +57,11 @@ public class AlbumViewAdapter extends RecyclerView.Adapter<AlbumViewAdapter.View
     public void onBindViewHolder(AlbumViewAdapter.ViewHolder holder, int position) {
         AlbumItem albumItem = albumItems.get(position);
         holder.textView.setText(albumItem.getName());
-        holder.imgThumbnail.setImageBitmap(albumItem.getBitMap());
+        Picasso.with(holder.imgThumbnail.getContext())
+                .load(albumItem.getUrl())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder)
+                .into(holder.imgThumbnail);
     }
 
     @Override

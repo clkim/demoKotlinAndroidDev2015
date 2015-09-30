@@ -2,8 +2,6 @@ package net.gouline.dagger2demo.activity
 
 import android.app.SearchManager
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v7.app.ActionBarActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -16,14 +14,11 @@ import kotlinx.android.synthetic.activity_album_search.empty_view
 import kotlinx.android.synthetic.activity_album_search.recycler_view
 import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
-import net.gouline.dagger2demo.model.ITunesResult
 import net.gouline.dagger2demo.rest.ITunesService
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
-import java.io.InputStream
-import java.net.URL
 import javax.inject.Inject
 
 /**
@@ -117,19 +112,14 @@ public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextLi
         DemoApplication.albumItemObservableCache =
                 // Properly injected Retrofit service
                 mITunesService.search(term, "album")
-                        .flatMap({ iTunesResultSet -> Observable.from(iTunesResultSet.results) })
-                        .map({ iTunesResult -> getAlbumItemFromITuneResult(iTunesResult) })
+                        .flatMap { iTunesResultSet -> Observable.from(iTunesResultSet.results) }
+                        .map { iTunesResult ->
+                            AlbumItem(iTunesResult.collectionName, iTunesResult.artworkUrl100)
+                        }
                         .subscribeOn(Schedulers.newThread())
                         .cache()
 
         displayCachedResults(DemoApplication.albumItemObservableCache)
-    }
-
-    private fun getAlbumItemFromITuneResult(iTunesResult: ITunesResult): AlbumItem {
-        val url: URL = URL(iTunesResult.artworkUrl100)
-        val instream: InputStream = url.openConnection().inputStream
-        val bitmap: Bitmap = BitmapFactory.decodeStream(instream)
-        return AlbumItem(bitmap, iTunesResult.collectionName)
     }
 
     private fun displayCachedResults(cache: Observable<AlbumItem>) {

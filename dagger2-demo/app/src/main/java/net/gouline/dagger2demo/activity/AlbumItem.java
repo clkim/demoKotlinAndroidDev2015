@@ -1,34 +1,23 @@
 package net.gouline.dagger2demo.activity;
 
-import android.graphics.Bitmap;
-
 /**
- * Created by clkim on 9/22/15.
+ * Created by clkim on 9/22/15
  */
 public class AlbumItem {
 
-    private Bitmap bitMap;
     private String name;
+    private String url;
 
-    public AlbumItem(Bitmap bitmap, String name) {
-        this.bitMap = bitmap;
+    public AlbumItem(String name, String url) {
         this.name = name;
-    }
-
-    public Bitmap getBitMap() {
-        return bitMap;
-    }
-
-    public void setBitMap(Bitmap bitMap) {
-        this.bitMap = bitMap;
+        this.url = url;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getUrl() {
+        return url;
     }
-
 }
