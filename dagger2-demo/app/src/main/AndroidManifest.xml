@@ -13,9 +13,7 @@
 
         <activity
             android:name=".activity.AlbumSearchActivity"
-            android:label="@string/activity_albums"
-
-            > <!-- android:screenOrientation="portrait" -->
+            android:label="@string/activity_albums">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

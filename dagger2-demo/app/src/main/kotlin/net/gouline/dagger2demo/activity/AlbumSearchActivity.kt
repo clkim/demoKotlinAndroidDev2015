@@ -36,6 +36,10 @@ public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextLi
 
     private var mCompositeSubscription: CompositeSubscription? = null
 
+    companion object {
+        private val TAG = AlbumSearchActivity::class.java.simpleName
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_album_search)
@@ -137,10 +141,6 @@ public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextLi
                         }
                 )
         )
-    }
-
-    companion object {
-        private val TAG = AlbumSearchActivity::class.java.simpleName
     }
 
     private fun setPromptVisibility(visibility: Int) {

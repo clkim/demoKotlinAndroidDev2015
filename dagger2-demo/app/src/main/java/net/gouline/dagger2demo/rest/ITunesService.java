@@ -2,8 +2,6 @@ package net.gouline.dagger2demo.rest;
 
 import net.gouline.dagger2demo.model.ITunesResultSet;
 
-import retrofit.Call;
-import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Query;
 import rx.Observable;
