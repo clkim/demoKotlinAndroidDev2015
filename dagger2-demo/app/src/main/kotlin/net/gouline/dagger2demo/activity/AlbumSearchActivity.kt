@@ -3,7 +3,7 @@ package net.gouline.dagger2demo.activity
 import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.app.ActionBarActivity
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SearchView
 import android.util.Log
@@ -27,7 +27,7 @@ import javax.inject.Inject
  *
  * Created by mgouline on 23/04/15.
  */
-public class AlbumSearchActivity : ActionBarActivity(), SearchView.OnQueryTextListener {
+public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
     @Inject
     lateinit var mITunesService: ITunesService
