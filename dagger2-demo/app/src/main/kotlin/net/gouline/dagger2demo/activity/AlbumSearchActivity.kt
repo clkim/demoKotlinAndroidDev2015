@@ -32,6 +32,11 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
     @Inject
     lateinit var mITunesService: ITunesService
 
+    // injected properties using Kotlin Android Extensions
+    // from ids in the layout file activity_album_search.xml
+    //  recycler_view: RecyclerView
+    //  empty_view:    TextView
+
     private var mAlbumViewAdapter: AlbumViewAdapter? = null
 
     private var mCompositeSubscription: CompositeSubscription? = null
@@ -50,8 +55,8 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
         mAlbumViewAdapter = AlbumViewAdapter()
 
         // id of RecyclerView in layout, using Kotlin Android Extensions
-        recycler_view.adapter = mAlbumViewAdapter
-        recycler_view.layoutManager = LinearLayoutManager(this)
+        this.recycler_view.adapter = mAlbumViewAdapter
+        this.recycler_view.layoutManager = LinearLayoutManager(this)
 
         // Reference - http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
         // we follow the pattern in above blog reference, although we have just one subscription in
@@ -88,7 +93,7 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
 
             // hide soft keyboard
             (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                    .hideSoftInputFromWindow(recycler_view.applicationWindowToken, 0)
+                    .hideSoftInputFromWindow(this.recycler_view.applicationWindowToken, 0)
         }
 
         return true
@@ -146,6 +151,6 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
     private fun setPromptVisibility(visibility: Int) {
         // using id of TextView - Kotlin Android Extensions
         //  this contains the prompt to search for artists' albums
-        empty_view.visibility = visibility
+        this.empty_view.visibility = visibility
     }
 }
