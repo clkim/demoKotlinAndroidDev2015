@@ -27,7 +27,7 @@ import javax.inject.Inject
  *
  * Created by mgouline on 23/04/15 - originally in java.
  */
-public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
+class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
     @Inject
     lateinit var mITunesService: ITunesService
