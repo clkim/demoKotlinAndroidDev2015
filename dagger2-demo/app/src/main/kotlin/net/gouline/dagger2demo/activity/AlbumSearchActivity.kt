@@ -129,7 +129,7 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
                         .map { iTunesResult ->
                             AlbumItem(iTunesResult.collectionName, iTunesResult.artworkUrl100)
                         }
-                        .subscribeOn(Schedulers.newThread())
+                        .subscribeOn(Schedulers.io())
                         .cache()
 
         displayCachedResults(DemoApplication.albumItemObservableCache)
