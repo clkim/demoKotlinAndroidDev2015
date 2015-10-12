@@ -29,6 +29,7 @@ import javax.inject.Inject
  */
 class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
+    // itunes api service (Retrofit2, injected in by Dagger2)
     @Inject
     lateinit var mITunesService: ITunesService
 
@@ -37,10 +38,13 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
     //  recycler_view: RecyclerView
     //  empty_view:    TextView
 
+    // adapter for recycler view
     private var mAlbumViewAdapter: AlbumViewAdapter? = null
 
+    // composite subscription used to un-subscribe rx subscriptions
     private var mCompositeSubscription: CompositeSubscription? = null
 
+    // object with "static" member property used by Log.x
     companion object {
         private val TAG = AlbumSearchActivity::class.java.simpleName
     }
