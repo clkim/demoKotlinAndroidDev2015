@@ -25,7 +25,7 @@ import javax.inject.Inject
  * Activity for search iTunes albums by artist name.
  *
  *
- * Created by mgouline on 23/04/15.
+ * Created by mgouline on 23/04/15 - originally in java.
  */
 public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
@@ -58,12 +58,12 @@ public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextLi
         //  this demo app and un-subscribing from the subscription directly seemed to work ok too
         mCompositeSubscription = CompositeSubscription()
 
-        // if cached observable, use it to display album items from prior api call
-        // tried checking for empty sequence in cached observable using
+        // if there is observable cached, use it to display album items from prior api call;
+        //  tried checking instead for empty sequence in cached observable using
         //   DemoApplication.albumItemObservableCache.count().toBlocking().single() != 0
         //  but it is too slow on orientation change right after starting a search, since it seems
         //  to block so as to count the items coming into the sequence from the new search; so we
-        //  accept the edge case that displays an empty view if cache is present but empty
+        //  live with the edge case that displays an empty view if cache is present but empty
         if (DemoApplication.albumItemObservableCache != null) {
             displayCachedResults(DemoApplication.albumItemObservableCache)
             // hide prompt-textview
@@ -105,16 +105,16 @@ public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextLi
     }
 
     override fun onDestroy() {
-        super.onStop()
+        super.onDestroy()
         mCompositeSubscription!!.unsubscribe()
     }
 
     private fun fetchResults(term: String) {
         // clear the items in recyclerview adapter
         mAlbumViewAdapter?.clear()
-        // reset cached observable
+        // cache newly fetched observable
         DemoApplication.albumItemObservableCache =
-                // Properly injected Retrofit service
+                // using the injected Retrofit service
                 mITunesService.search(term, "album")
                         .flatMap { iTunesResultSet -> Observable.from(iTunesResultSet.results) }
                         .map { iTunesResult ->
@@ -129,16 +129,16 @@ public class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextLi
     private fun displayCachedResults(cache: Observable<AlbumItem>) {
         // subscribe to the observable in order to display the album items, and also
         // add the subscription to the CompositeSubscription so we can do lifecycle un-subscribe
-        mCompositeSubscription!!.add(cache.observeOn(AndroidSchedulers.mainThread())
+        mCompositeSubscription!!.add(
+            cache.observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        { albumItem ->
-                            mAlbumViewAdapter!!.addAlbumItem(albumItem)
-                            mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
-                        },
-                        { throwable ->
-                            Log.w(TAG, "Failed to retrieve albums\n" + throwable.getMessage(),
-                                    throwable)
-                        }
+                    { albumItem ->
+                        mAlbumViewAdapter!!.addAlbumItem(albumItem)
+                        mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
+                    },
+                    { throwable ->
+                        Log.w(TAG, "Failed to retrieve albums\n"+throwable.getMessage(), throwable)
+                    }
                 )
         )
     }
