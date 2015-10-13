@@ -16,6 +16,7 @@ import net.gouline.dagger2demo.DemoApplication
 import net.gouline.dagger2demo.R
 import net.gouline.dagger2demo.rest.ITunesService
 import rx.Observable
+import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
@@ -115,7 +116,7 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
 
     override fun onDestroy() {
         super.onDestroy()
-        mCompositeSubscription!!.unsubscribe()
+        mCompositeSubscription?.unsubscribe()
     }
 
     private fun fetchResults(term: String) {
@@ -136,20 +137,22 @@ class AlbumSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener 
     }
 
     private fun displayCachedResults(cache: Observable<AlbumItem>) {
-        // subscribe to the observable in order to display the album items, and also
-        // add the subscription to the CompositeSubscription so we can do lifecycle un-subscribe
-        mCompositeSubscription!!.add(
-            cache.observeOn(AndroidSchedulers.mainThread())
+        // subscribe to the observable in order to display the album items
+        val subscription: Subscription = cache
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     { albumItem ->
-                        mAlbumViewAdapter!!.addAlbumItem(albumItem)
-                        mAlbumViewAdapter!!.notifyItemInserted(mAlbumViewAdapter!!.itemCount - 1)
+                        mAlbumViewAdapter?.addAlbumItem(albumItem)
+                        mAlbumViewAdapter?.notifyItemInserted(
+                                mAlbumViewAdapter?.itemCount?.minus(1) ?: 0)
                     },
                     { throwable ->
                         Log.w(TAG, "Failed to retrieve albums\n"+throwable.getMessage(), throwable)
                     }
                 )
-        )
+        // add the subscription to the CompositeSubscription
+        //  so we can do lifecycle un-subscribe
+        mCompositeSubscription?.add(subscription)
     }
 
     private fun setPromptVisibility(visibility: Int) {
