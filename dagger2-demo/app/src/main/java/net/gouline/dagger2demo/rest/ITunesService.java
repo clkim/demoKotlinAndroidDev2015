@@ -13,5 +13,6 @@ import rx.Observable;
  */
 public interface ITunesService {
     @GET("search")
-    Observable<ITunesResultSet> search(@Query("term") String term, @Query("entity") String entity);
+    Observable<ITunesResultSet> search(@Query("term") String term,
+                                       @Query("entity") String entity);
 }

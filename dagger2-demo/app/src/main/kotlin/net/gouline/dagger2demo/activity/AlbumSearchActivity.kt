@@ -127,13 +127,15 @@ class AlbumSearchActivity : AppCompatActivity(),
         DemoApplication.albumItemObservableCache =
                 // using the injected Retrofit service
                 mITunesService.search(term, "album")
-                        .flatMap { iTunesResultSet -> Observable.from(iTunesResultSet.results) }
+                        .flatMap { iTunesResultSet ->
+                            Observable.from(iTunesResultSet.results)
+                        }
                         .map { iTunesResult ->
-                            AlbumItem(iTunesResult.collectionName, iTunesResult.artworkUrl100)
+                            AlbumItem(iTunesResult.collectionName,
+                                      iTunesResult.artworkUrl100)
                         }
                         .subscribeOn(Schedulers.io())
                         .cache()
-
         displayCachedResults(DemoApplication.albumItemObservableCache)
     }
 
@@ -142,14 +144,15 @@ class AlbumSearchActivity : AppCompatActivity(),
         val subscription: Subscription = cache
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { albumItem ->
-                        mAlbumViewAdapter?.addAlbumItem(albumItem)
-                        mAlbumViewAdapter?.notifyItemInserted(
-                                mAlbumViewAdapter?.itemCount?.minus(1) ?: 0)
-                    },
-                    { throwable ->
-                        Log.w(TAG, "Failed to retrieve albums\n"+throwable.getMessage(), throwable)
-                    }
+                        { albumItem ->
+                            mAlbumViewAdapter?.addAlbumItem(albumItem)
+                            mAlbumViewAdapter?.notifyItemInserted(
+                                    mAlbumViewAdapter?.itemCount?.minus(1) ?: 0)
+                        },
+                        { throwable ->
+                            Log.w(TAG, "Retrieve albums failed\n" + throwable.getMessage(),
+                                    throwable)
+                        }
                 )
         // add the subscription to the CompositeSubscription
         //  so we can do lifecycle un-subscribe
