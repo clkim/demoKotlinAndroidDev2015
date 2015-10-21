@@ -1,32 +1,27 @@
-Android Samples
-===============
+Introducing Kotlin For Android Development
+==========================================
 
-Sample Android code for the tutorials on my [blog][1].
+## Demo app for AnDevCon Santa Clara 2015 class
+#### Search iTunes for Albums (without downloading)
 
-Developed By
-------------
-* Mike Gouline
+The app demonstrates Kotlin code working with the popular Dagger 2, Retrofit 2, and RxJava/RxAndroid
+(Java) libraries.
 
-The MIT License (MIT)
----------------------
+<img src="DemoAppSreenshot.png" width="240" height="420" />
 
-    Copyright (c) 2015 Mike Gouline
+The no-frills but functional app allows the user to search for albums with the Search icon in the
+action bar, enter a search term, then touch the soft keyboard's search icon (albums' text and
+thumbnail images displayed).
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy of
-    this software and associated documentation files (the "Software"), to deal in
-    the Software without restriction, including without limitation the rights to
-    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-    the Software, and to permit persons to whom the Software is furnished to do so,
-    subject to the following conditions:
+Fetched entries are cached, so orientation changes do not necessitate making the api call to the
+iTunes REST service again.
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+We converted the *AlbumSearchActivity* class to Kotlin from Java. For simplicity, the rest of the
+demo app is left in Java.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    
-[1]: http://blog.gouline.net/tag/android/
+We wrote a simple Java unit test class to test the Kotlin *AlbumSearchActivity* class.
+
+Acknowledgement -- We used as starting point Mike Gouline's "Dagger 2 Demo" app that can be found at
+[Android Samples repo](https://github.com/mgouline/android-samples), and then built it out.
+Refer to the comments in the main AlbumSearchActivity.kt class for some background and other
+acknowledgements.
