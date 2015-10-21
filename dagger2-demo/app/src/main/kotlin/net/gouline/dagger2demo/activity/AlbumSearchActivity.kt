@@ -26,7 +26,24 @@ import javax.inject.Inject
  * Activity for search iTunes albums by artist name.
  *
  *
- * Created by mgouline on 23/04/15 - originally in java.
+ * Created by mgouline on 23/04/15.
+ * Converted by clkim to Kotlin from original java,
+ * then substantially refactored, e.g. RecyclerView,
+ * hiding soft keyboard, hiding prompt in textview when
+ * album list is not empty, handling orientation change
+ * e.g. caching what has been fetched, using Retrofit 2,
+ * RxJava/RxAndroid and life-cycle handling, Picasso...
+ *
+ * Added basic unit tests for Activity, written in Java
+ *   AlbumSearchActivityTest
+ * To run it, connect a device via USB to dev machine,
+ * then in Android Studio > Run AlbumSearchActivityTest
+ *
+ * Acknowledgements:
+ * Mike Gouline's blog on Dagger 2
+ * Sittiphol Phanvilai’s blog on Retrofit 2
+ * Dan Lew’s blogs “Grokking RxJava” and on RxAndroid 1.0
+ * Edwin Jose and NILANCHALA for RecyclerView examples
  */
 class AlbumSearchActivity : AppCompatActivity(),
         SearchView.OnQueryTextListener {
