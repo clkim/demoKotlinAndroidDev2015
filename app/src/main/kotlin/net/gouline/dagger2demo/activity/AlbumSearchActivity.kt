@@ -111,7 +111,7 @@ class AlbumSearchActivity : AppCompatActivity(),
     }
 
     override fun onQueryTextSubmit(term: String): Boolean {
-        if (term.length() > 0) {
+        if (term.length > 0) {
             fetchResults(term)
 
             // hide soft keyboard
@@ -124,9 +124,9 @@ class AlbumSearchActivity : AppCompatActivity(),
 
     override fun onQueryTextChange(s: String): Boolean {
         // show prompt-textview if search term is blanked out and no album items are displayed
-        if (s.length() > 0)
+        if (s.length > 0)
             setPromptVisibility(View.GONE)
-        else if (s.length() == 0 && mAlbumViewAdapter?.itemCount == 0)
+        else if (s.length == 0 && mAlbumViewAdapter?.itemCount == 0)
             setPromptVisibility(View.VISIBLE)
 
         return false
@@ -160,7 +160,7 @@ class AlbumSearchActivity : AppCompatActivity(),
                           mAlbumViewAdapter?.notifyItemInserted(
                                   mAlbumViewAdapter?.itemCount?.minus(1) ?: 0)
                         },
-                        { Log.w(TAG, "Retrieve albums failed\n" + it.getMessage(), it) })
+                        { Log.w(TAG, "Retrieve albums failed\n" + it.message, it) })
         // add the subscription to the CompositeSubscription
         //  so we can do lifecycle un-subscribe
         mCompositeSubscription?.add(subscription)
